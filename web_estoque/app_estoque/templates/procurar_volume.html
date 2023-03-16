@@ -1,0 +1,12 @@
+<htm>
+    <body>
+        <form action={% url 'procurar_volume' %} method = "POST">
+            {% csrf_token %}
+            <input type="number" placeholder="Escreva a volume" name="volume">
+            <input type="submit">
+        </form>
+        <p>
+            {{Items}}
+        </p>
+    </body>
+</htm>
