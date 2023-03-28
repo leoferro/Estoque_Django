@@ -7,3 +7,5 @@ from app_estoque.models import *
 def index(request):
     return HttpResponse("Pagina Inicial")
 
+def teste(request):
+    return render(request, 'teste.html')
