@@ -9,3 +9,9 @@ def index(request):
 
 def teste(request):
     return render(request, 'teste.html')
+
+def cadastro(request):
+    return render(request, 'cadastro_teste.html')
+
+def date(request):
+    return render(request, 'date.html')
