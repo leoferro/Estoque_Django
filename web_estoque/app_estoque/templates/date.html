@@ -12,18 +12,18 @@
 <div class="container mt-3">
   <h2>Relatórios</h2>
   <p>Gerar relatórios a partir dos campos:</p>
-<form>
+<form action = "date" method="POST"> {% csrf_token %}
     <div class="input-group mb-3">
         <span class="input-group-text"><b>Datas :</b></span>
         <span class="input-group-text">de</span>
-      <input id="InicioData" class="form-control" type="date" placeholder="Inicio"/>
+      <input id="InicioData" class="form-control" type="date" placeholder="Inicio" name="inicio"/>
         <span class="input-group-text">até</span>
-      <input id="FimData" class="form-control" type="date" />
+      <input id="FimData" class="form-control" type="date" name = "fim"/>
     </div>
 
     <div class="input-group mb-3">
         <span class="input-group-text"><b>Periodicidade :</b></span>
-         <select class="form-select">
+         <select class="form-select" name="periodo">
           <option>Mensal</option>
           <option>Quinzenal</option>
           <option>Semanal</option>
@@ -32,7 +32,7 @@
         </select>
 
         <span class="input-group-text"><b>Categoria :</b></span>
-         <select class="form-select">
+         <select class="form-select" name="categoria">
           <option>Todas</option>
           <option>Refrigerante</option>
           <option>Cervejas</option>
@@ -42,11 +42,11 @@
     </div>
 
          <div class="form-check form-switch">
-              <input class="form-check-input" type="radio" id="vendas" name="vendas-estoque" checked>
+              <input class="form-check-input" type="radio" id="vendas" name="vendas-estoque" value="Vendas" checked>
               <label class="form-check-label" for="vendas">Vendas</label>
          </div>
         <div class="form-check form-switch">
-              <input class="form-check-input" type="radio" id="estoque" name="vendas-estoque">
+              <input class="form-check-input" type="radio" id="estoque" name="vendas-estoque" value="Estoque">
               <label class="form-check-label" for="estoque">Estoque</label>
          </div>
 
@@ -56,5 +56,38 @@
 
 </form>
 </div>
+{% if tipo %}
+<div class="container mt-3">
+  <h4 class="mt-5">{{tipo}} {{periodo}} de {{inicio}} até {{fim}} da categoria {{categoria}}</h4>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Data Referencia</th>
+        <th>Custo Unitario</th>
+        <th>Valor de Venda</th>
+        <th>Quantidade</th>
+        <th>Lucro</th>
+      </tr>
+    </thead>
+    <tbody>
+
+    {% for p in produtos %}
+    <tr>
+        <td>{{p.produto}}</td>
+        <td>{{p.data_ref}}</td>
+        <td>{{p.custo_unitario}}</td>
+        <td>{{p.valor_venda}}</td>
+        <td>{{p.quantidade}}</td>
+        <td>{{p.lucro}}</td>
+    </tr>
+    {% endfor %}
+
+
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
 </body>
 </html>
