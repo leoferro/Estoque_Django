@@ -41,7 +41,6 @@ def relatorio(request):
     }
     if request.POST:
         #print(request.POST)
-        print(request.POST['inicio'])
 
         if (request.POST['inicio']=='' or request.POST['fim']==''):
             retorno['erro'] = "Preencha Todos os Campos!"
