@@ -9,6 +9,14 @@
 </head>
 <body>
 
+{% if erro %}
+<div class="alert alert-info">
+  <strong>Erro:</strong> {{erro}}
+</div>
+{% endif %}
+
+
+
 <div class="container mt-3">
   <h2>Relatórios</h2>
   <p>Gerar relatórios a partir dos campos:</p>
@@ -85,26 +93,35 @@
   <table class="table table-hover  mt-3">
     <thead>
       <tr>
-        <th>Produto</th>
-        <th>Data Referencia</th>
-        <th>Custo Unitario</th>
-        <th>Valor de Venda</th>
-        <th>Quantidade</th>
-        <th>Lucro</th>
+          {% for col in columns %}
+        <th>{{col}}</th>
+          {% endfor %}
       </tr>
     </thead>
     <tbody>
+    {% if tipo == "Vendas" %}
+        {% for p in produtos %}
+            <tr>
+                <td>{{p.produto}}</td>
+                <td>{{p.data_ref}}</td>
+                <td>{{p.custo_unitario}}</td>
+                <td>{{p.valor_venda}}</td>
+                <td>{{p.quantidade}}</td>
+                <td>{{p.lucro}}</td>
+            </tr>
+        {% endfor %}
+    {% else %}
+        {% for p in produtos %}
+            <tr>
+                <td>{{p.produto}}</td>
+                <td>{{p.data_validade}}</td>
+                <td>{{p.custo_unitario}}</td>
+                <td>{{p.quantidade}}</td>
+                <td>{{p.valor_estoque}}</td>
+            </tr>
+        {% endfor %}
+    {% endif %}
 
-    {% for p in produtos %}
-    <tr>
-        <td>{{p.produto}}</td>
-        <td>{{p.data_ref}}</td>
-        <td>{{p.custo_unitario}}</td>
-        <td>{{p.valor_venda}}</td>
-        <td>{{p.quantidade}}</td>
-        <td>{{p.lucro}}</td>
-    </tr>
-    {% endfor %}
 
 
     </tbody>
