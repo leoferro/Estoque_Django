@@ -1,6 +1,7 @@
 import csv
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.utils.dateparse import parse_date
 from app_estoque.models import *
 
 # Create your views here.
@@ -59,6 +60,10 @@ def relatorio(request):
         if (request.POST['inicio']=='' or request.POST['fim']==''):
             retorno['erro'] = "Preencha Todos os Campos!"
 
+        #Retorna erro se a data inicial for maior que a final
+        elif parse_date(request.POST['inicio']) > parse_date(request.POST['fim']):
+            retorno['erro'] = "A data inicial deve ser menor ou igual que à final!"
+
         else:
             #Os campos estão prenchidos corretamentes então á é adicionado ao dicionario de resposta as variáveis escolhidas
             retorno['inicio']    = request.POST['inicio']
@@ -66,6 +71,7 @@ def relatorio(request):
             retorno['categoria'] = request.POST['categoria']
             retorno['periodo']   = request.POST['periodo']
             retorno['tipo']      = request.POST['vendas-estoque']
+
 
 
             if request.POST['vendas-estoque'] == "Vendas":
