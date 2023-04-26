@@ -7,3 +7,4 @@ class Itens(models.Model):
     nome      = models.CharField(max_length=30)
     volum_ml  = models.IntegerField()
     categoria = models.CharField(max_length=30)
+
