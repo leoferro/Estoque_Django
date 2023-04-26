@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Relatório</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Importação do bootstrap -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <!-- Fim da importação do Bootstrap -->
+
+</head>
+<body>
+
+<!-- Se retornado a chave erro no dicionario ele vai criar um alerta de erro -->
+{% if erro %}
+<div class="alert alert-info">
+  <strong>Erro:</strong> {{erro}}
+</div>
+{% endif %}
+<!-- Fim do condicional do erro -->
+
+
+
+<!-- Container do formulário -->
+<div class="container mt-3">
+  <h2>Relatórios</h2>
+  <p>Gerar relatórios a partir dos campos:</p>
+    <form action = "relatorio" method="POST">
+        {% csrf_token %}
+        <!--
+        action e para qual página ele irá redirecionar depois de enviar o formulário
+        method estamos usando o post pela facilidade do Django com o post e segurança
+        csrf_TOKEN necessário para o Django fazer o post
+        -->
+
+        <div class="input-group mb-3">
+            <span class="input-group-text"><b>Datas :</b></span>
+            <span class="input-group-text">de</span>
+          <input id="InicioData" class="form-control" type="date" placeholder="Inicio" name="inicio"/>
+            <span class="input-group-text">até</span>
+          <input id="FimData" class="form-control" type="date" name = "fim"/>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text"><b>Periodicidade :</b></span>
+             <select class="form-select" name="periodo">
+              <option>Mensal</option>
+              <option>Quinzenal</option>
+              <option>Semanal</option>
+              <option>Diário</option>
+              <option>Anual</option>
+            </select>
+
+            <span class="input-group-text"><b>Categoria :</b></span>
+             <select class="form-select" name="categoria">
+              <option>Todas</option>
+              <option>Refrigerante</option>
+              <option>Cervejas</option>
+              <option>Destilados</option>
+              <option>...</option>
+            </select>
+        </div>
+
+        <div class="row mt-3">
+
+            <div class="col-9 ">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="radio" id="vendas" name="vendas-estoque" value="Vendas" checked>
+                  <label class="form-check-label" for="vendas">Vendas</label>
+                </div>
+                <div class="form-check form-switch">
+                      <input class="form-check-input" type="radio" id="estoque" name="vendas-estoque" value="Estoque">
+                      <label class="form-check-label" for="estoque">Estoque</label>
+                 </div>
+            </div>
+
+            <div class="col-3 mt-3">
+                <button type="reset" class="btn btn-secondary">Limpar</button>
+                <button type="submit" class="btn btn-primary">Gerar Relatório</button>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- fim do container do formulario -->
+
+
+<!-- Se o dicionario tiver a chave tipo será criada as tabelas abaixo caso contrario nada será criado   -->
+{% if tipo %}
+<div class="container mt-5">
+    <div class="row">
+      <div class="col-11">
+          <h4>{{tipo}} {{periodo}} de {{inicio}} até {{fim}} da categoria {{categoria}}</h4>
+      </div>
+      <div class="col-1">
+              <a href="download?tipo={{tipo}}&inicio={{inicio}}&fim={{fim}}&periodo={{periodo}}&categoria={{categoria}}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-filetype-csv" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5ZM3.517 14.841a1.13 1.13 0 0 0 .401.823c.13.108.289.192.478.252.19.061.411.091.665.091.338 0 .624-.053.859-.158.236-.105.416-.252.539-.44.125-.189.187-.408.187-.656 0-.224-.045-.41-.134-.56a1.001 1.001 0 0 0-.375-.357 2.027 2.027 0 0 0-.566-.21l-.621-.144a.97.97 0 0 1-.404-.176.37.37 0 0 1-.144-.299c0-.156.062-.284.185-.384.125-.101.296-.152.512-.152.143 0 .266.023.37.068a.624.624 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.092 1.092 0 0 0-.2-.566 1.21 1.21 0 0 0-.5-.41 1.813 1.813 0 0 0-.78-.152c-.293 0-.551.05-.776.15-.225.099-.4.24-.527.421-.127.182-.19.395-.19.639 0 .201.04.376.122.524.082.149.2.27.352.367.152.095.332.167.539.213l.618.144c.207.049.361.113.463.193a.387.387 0 0 1 .152.326.505.505 0 0 1-.085.29.559.559 0 0 1-.255.193c-.111.047-.249.07-.413.07-.117 0-.223-.013-.32-.04a.838.838 0 0 1-.248-.115.578.578 0 0 1-.255-.384h-.765ZM.806 13.693c0-.248.034-.46.102-.633a.868.868 0 0 1 .302-.399.814.814 0 0 1 .475-.137c.15 0 .283.032.398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.441 1.441 0 0 0-.489-.272 1.838 1.838 0 0 0-.606-.097c-.356 0-.66.074-.911.223-.25.148-.44.359-.572.632-.13.274-.196.6-.196.979v.498c0 .379.064.704.193.976.131.271.322.48.572.626.25.145.554.217.914.217.293 0 .554-.055.785-.164.23-.11.414-.26.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.799.799 0 0 1-.118.363.7.7 0 0 1-.272.25.874.874 0 0 1-.401.087.845.845 0 0 1-.478-.132.833.833 0 0 1-.299-.392 1.699 1.699 0 0 1-.102-.627v-.495Zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879l-1.327 4Z"/>
+                </svg>
+            </a>
+      </div>
+    </div>
+
+
+  <table class="table table-hover  mt-3">
+    <thead>
+      <tr>
+          <!-- As colunas serão passadas pela view já prontas chaveando entre vendas e estoque -->
+          {% for col in columns %}
+        <th>{{col}}</th>
+          {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    <!-- Se o valor da chave do dicionario "tipo"  for vendas ele vai buscar esses atributos de produtos-->
+    {% if tipo == "Vendas" %}
+        {% for p in produtos %}
+            <tr>
+                <td>{{p.produto}}</td>
+                <td>{{p.data_ref}}</td>
+                <td>{{p.custo_unitario}}</td>
+                <td>{{p.valor_venda}}</td>
+                <td>{{p.quantidade}}</td>
+                <td>{{p.lucro}}</td>
+            </tr>
+        {% endfor %}
+    <!-- Se o valor da chave do dicionario "tipo"  for estoque ele vai buscar esses outros atributos de produtos-->
+    {% else %}
+        {% for p in produtos %}
+            <tr>
+                <td>{{p.produto}}</td>
+                <td>{{p.data_validade}}</td>
+                <td>{{p.custo_unitario}}</td>
+                <td>{{p.quantidade}}</td>
+                <td>{{p.valor_estoque}}</td>
+            </tr>
+        {% endfor %}
+    {% endif %}
+
+
+
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+
+
+</body>
+</html>
