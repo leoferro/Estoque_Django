@@ -12,6 +12,9 @@ def index(request):
 def teste(request):
     return render(request, 'teste.html')
 
+def template(request):
+    return render(request, 'template.html')
+
 
 
 
