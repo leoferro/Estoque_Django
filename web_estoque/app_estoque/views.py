@@ -15,7 +15,8 @@ def teste(request):
 def template(request):
     return render(request, 'template.html')
 
-
+def pagina_compra(request):
+    return render(request, 'pagina_compra.html')
 
 
 #Testes
