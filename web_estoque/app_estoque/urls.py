@@ -8,7 +8,7 @@ urlpatterns = [
     path("template", views.template, name="template"),
 
     path("pagina_de_compra", views.pagina_compra, name="pagina_compra"),
-
+    path("venda_do_produto", views.pagina_venda, name="venda_do_produto"),
     #testes:
     path("tabela_ex", views.tabela_ex, name="tabela_ex"),
     path('delete_item', views.delete_item, name="delete_item"),

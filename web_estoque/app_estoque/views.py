@@ -29,6 +29,9 @@ def delete_item(request):
     print(request.POST)
     return tabela_ex(request)
 
+def pagina_venda(request):
+    return render(request, 'venda_do_produto.html')
+
 
 
 
