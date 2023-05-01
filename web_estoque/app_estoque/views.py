@@ -86,11 +86,13 @@ def relatorio(request):
                 #-----------------------------
                 #Realizar Querry de vendas no DB
                 produtos = Item_Venda.vendas_entre(retorno['inicio'], retorno['fim'])
-                produtos = produtos.annotate(lucro =  (F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade'))
+                # --------------------------DESCONTO APLICADO POR COMPRA, SE FRO POR ITEM MODIFICAR-------------
+                produtos = produtos.annotate(lucro =  (F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade')-F('desconto'))
+                produtos = produtos.annotate(total =  F('fk_compra_id__valor_de_venda')*F('quantidade')-F('desconto'))
                 #------------------------------
 
                 #Atribuição das colunas de vendas e dos produtos
-                retorno['columns'] = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Quantidade', 'Lucro']
+                retorno['columns'] = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Desconto' , 'Quantidade', "Total" ,'Lucro']
 
                 #produtos.append({'produto':'Coca Cola Tradicional Garrafa 2L', 'data_ref':'21/12/2022', 'custo_unitario':4.99, "valor_venda":5.99, 'quantidade':20,'lucro':1.00})
                 #produtos.append({'produto': 'Coca Cola Zero Garrafa 2L', 'data_ref': '21/12/2022', 'custo_unitario': 4.99, "valor_venda": 5.99, 'quantidade': 10, 'lucro': 1.00})
@@ -136,9 +138,9 @@ def download(request):
         produtos = produtos\
             .annotate(lucro=(F('fk_compra_id__valor_de_venda') - F('fk_compra_id__custo_unitario')) * F('quantidade'))
         produtos = list(produtos)
-        campos = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Quantidade', 'Lucro']
+        campos = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Desconto' , 'Quantidade', "Total" ,'Lucro']
         for p in produtos:
-            valores.append([p.fk_item_id , p.data_venda, p.fk_compra_id.custo_unitario, p.fk_compra_id.valor_de_venda, p.quantidade, (p.fk_compra_id.valor_de_venda-p.fk_compra_id.custo_unitario)*p.quantidade])
+            valores.append([p.fk_item_id , p.data_venda, p.fk_compra_id.custo_unitario, p.fk_compra_id.valor_de_venda, p.desconto  , p.quantidade, p.fk_compra_id.valor_de_venda*p.quantidade-p.desconto, (p.fk_compra_id.valor_de_venda-p.fk_compra_id.custo_unitario)*p.quantidade-p.desconto])
     # ------------------------------
 
 
