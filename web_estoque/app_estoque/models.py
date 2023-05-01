@@ -23,6 +23,8 @@ class Item_Venda(models.Model):
     fk_item_id          = models.ForeignKey('Itens', on_delete=models.PROTECT)
     quantidade          = models.PositiveSmallIntegerField()
     desconto            = models.FloatField(default=0)
+    fk_compra_id        = models.ForeignKey('Compra', on_delete=models.PROTECT, default=1)
+    #precisa pegar ligar em qual compra foi para pegar o valor
 
     def __str__(self):
         return f"{self.data_venda} - {self.quantidade} {self.fk_item_id.nome}"
@@ -36,7 +38,7 @@ class Item_Venda(models.Model):
         :param data_maior: Maior data da consulta
         :return: Todas as vendas entre essas datas
         '''
-        return Item_Venda.objects.filter(data_venda__lte = data_maior, data_venda__gte = data_menor)
+        return Item_Venda.objects.filter(data_venda__lte = data_maior, data_venda__gte = data_menor).order_by('data_venda')
 
     @staticmethod
     def add_venda(id_item, quantidade, desconto=0, data=''):
@@ -58,7 +60,7 @@ class Item_Venda(models.Model):
             print(quantidade)
             compra = Compra.encontrar_em_estoque(id_item).first()
             print(compra.restantes)
-            venda = Item_Venda(data_venda=data, quantidade=quantidade, desconto=desconto, fk_item_id=item)
+            venda = Item_Venda(data_venda=data, quantidade=quantidade, desconto=desconto, fk_item_id=item, fk_compra_id = compra)
             if compra.restantes >= quantidade:
                 compra.restantes -= quantidade
                 quantidade = 0

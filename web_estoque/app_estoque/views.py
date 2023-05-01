@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
 from app_estoque.models import *
+from django.db.models import F
 
 # Create your views here.
 
@@ -84,14 +85,17 @@ def relatorio(request):
             if request.POST['vendas-estoque'] == "Vendas":
                 #-----------------------------
                 #Realizar Querry de vendas no DB
+                produtos = Item_Venda.vendas_entre(retorno['inicio'], retorno['fim'])
+                produtos = produtos.annotate(lucro =  (F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade'))
                 #------------------------------
 
                 #Atribuição das colunas de vendas e dos produtos
                 retorno['columns'] = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Quantidade', 'Lucro']
 
-                produtos.append({'produto':'Coca Cola Tradicional Garrafa 2L', 'data_ref':'21/12/2022', 'custo_unitario':4.99, "valor_venda":5.99, 'quantidade':20,'lucro':1.00})
-                produtos.append({'produto': 'Coca Cola Zero Garrafa 2L', 'data_ref': '21/12/2022', 'custo_unitario': 4.99, "valor_venda": 5.99, 'quantidade': 10, 'lucro': 1.00})
+                #produtos.append({'produto':'Coca Cola Tradicional Garrafa 2L', 'data_ref':'21/12/2022', 'custo_unitario':4.99, "valor_venda":5.99, 'quantidade':20,'lucro':1.00})
+                #produtos.append({'produto': 'Coca Cola Zero Garrafa 2L', 'data_ref': '21/12/2022', 'custo_unitario': 4.99, "valor_venda": 5.99, 'quantidade': 10, 'lucro': 1.00})
 
+                retorno['produtos'] = produtos
 
             elif request.POST['vendas-estoque']=="Estoque":
                 #-----------------------------
@@ -125,13 +129,19 @@ def download(request):
     # -----------------------------
     # Realizar Querry de Vendas ou Estoque no DB
     print(f'Querry de {request.GET["tipo"]}')
+
+    valores = []
+    if request.GET['tipo']=="Vendas":
+        produtos = Item_Venda.vendas_entre(request.GET['inicio'], request.GET['fim'])
+        produtos = produtos\
+            .annotate(lucro=(F('fk_compra_id__valor_de_venda') - F('fk_compra_id__custo_unitario')) * F('quantidade'))
+        produtos = list(produtos)
+        campos = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Quantidade', 'Lucro']
+        for p in produtos:
+            valores.append([p.fk_item_id , p.data_venda, p.fk_compra_id.custo_unitario, p.fk_compra_id.valor_de_venda, p.quantidade, (p.fk_compra_id.valor_de_venda-p.fk_compra_id.custo_unitario)*p.quantidade])
     # ------------------------------
 
-    campos = ['Item','Categoria', 'Data Ref', 'Preço Compra', "Preço Venda","Unidades", "Lucro"]
-    valores = [
-        ['Coca Cola Tradicional Garrafa 2L', 'Refrigerante','2023-04-01', 5.99,6.99,10,10.00 ],
-        ['Coca Cola Zero Garrafa 2L', 'Refrigerante', '2023-04-01', 5.99,6.99,6,6.00]
-    ]
+
 
     #Criação do stream CSV na resposta para retorno dele
     writer = csv.writer(response, csv.excel)

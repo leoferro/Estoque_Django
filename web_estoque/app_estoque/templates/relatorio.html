@@ -118,10 +118,10 @@
     {% if tipo == "Vendas" %}
         {% for p in produtos %}
             <tr>
-                <td>{{p.produto}}</td>
-                <td>{{p.data_ref}}</td>
-                <td>{{p.custo_unitario}}</td>
-                <td>{{p.valor_venda}}</td>
+                <td>{{p.fk_item_id}}</td>
+                <td>{{p.data_venda}}</td>
+                <td>{{p.fk_compra_id.custo_unitario}}</td>
+                <td>{{p.fk_compra_id.valor_de_venda}}</td>
                 <td>{{p.quantidade}}</td>
                 <td>{{p.lucro}}</td>
             </tr>
