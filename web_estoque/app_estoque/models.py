@@ -14,7 +14,7 @@ class Itens(models.Model):
     volume              = models.CharField(max_length=30)
 
     def __str__(self):
-        return f"{self.nome} - {self.marca} - {self.categoria} - {self.produto_sabor} - {self.tipo} {self.volume}"
+        return f"{self.marca.upper()} - {self.nome} {self.produto_sabor} - {self.tipo} {self.volume}"
 
 
 class Item_Venda(models.Model):
@@ -57,9 +57,7 @@ class Item_Venda(models.Model):
         item = Itens.objects.get(item_id=id_item)
 
         while quantidade>0:
-            print(quantidade)
             compra = Compra.encontrar_em_estoque(id_item).first()
-            print(compra.restantes)
             venda = Item_Venda(data_venda=data, quantidade=quantidade, desconto=desconto, fk_item_id=item, fk_compra_id = compra)
             if compra.restantes >= quantidade:
                 compra.restantes -= quantidade

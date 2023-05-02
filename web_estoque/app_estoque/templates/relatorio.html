@@ -39,9 +39,9 @@
         <div class="input-group mb-3">
             <span class="input-group-text"><b>Datas :</b></span>
             <span class="input-group-text">de</span>
-          <input id="InicioData" class="form-control" type="date" placeholder="Inicio" name="inicio"/>
+          <input id="InicioData" class="form-control" type="date" placeholder="Inicio" name="inicio" value= {{date_default}} />
             <span class="input-group-text">até</span>
-          <input id="FimData" class="form-control" type="date" name = "fim"/>
+          <input id="FimData" class="form-control" type="date" name = "fim" value= {{date_default}} />
         </div>
 
         <div class="input-group mb-3">
@@ -128,17 +128,42 @@
                 <td>{{p.lucro}}</td>
             </tr>
         {% endfor %}
+            <tr>
+                <td><B>TOTAL</B></td>
+                <td><B>-</B></td>
+                <td><b>-</b></td>
+                <td><b>-</b></td>
+                <td><b>-</b></td>
+                <td><b>{{quantidade.quantidade__sum}}</b></td>
+                <td><b>{{total.total__sum}}</b></td>
+                <td><b>{{lucro.lucro__sum}}</b></td>
+            </tr>
     <!-- Se o valor da chave do dicionario "tipo"  for estoque ele vai buscar esses outros atributos de produtos-->
     {% else %}
         {% for p in produtos %}
             <tr>
-                <td>{{p.produto}}</td>
-                <td>{{p.data_validade}}</td>
+                <td>{{p.fk_item_id}}</td>
+                <td>{{p.numero_referencia}}</td>
+                <td>{{p.data_compra}}</td>
+                <td>{{p.validade}}</td>
                 <td>{{p.custo_unitario}}</td>
-                <td>{{p.quantidade}}</td>
+                <td>{{p.valor_de_venda}}</td>
+                <td>{{p.restantes}}</td>
                 <td>{{p.valor_estoque}}</td>
+                <td>{{p.lucro_potencial}}</td>
             </tr>
         {% endfor %}
+            <tr>
+                <td><B>TOTAL</B></td>
+                <td><b>-</b></td>
+                <td><b>-</b></td>
+                <td><b>-</b></td>
+                <td><b>-</b></td>
+                <td><b>-</b></td>
+                <td><b>{{quantidade.restantes__sum}}</b></td>
+                <td><b>{{valor_estoque.valor_estoque__sum}}</b></td>
+                <td><b>{{lucro_potencial.lucro_potencial__sum}}</b></td>
+            </tr>
     {% endif %}
 
 

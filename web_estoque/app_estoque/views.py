@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
 from app_estoque.models import *
-from django.db.models import F
+from django.db.models import F, Sum
+from datetime import datetime
 
 # Create your views here.
 
@@ -59,6 +60,7 @@ def relatorio(request):
     retorno = {
         'produtos':produtos
     }
+    retorno['date_default'] = datetime.now().strftime("%Y-%m-%d")
     #Só executa se o metodo for POST, ou seja, quando entra na pagina é o metodo GET e não executa
     if request.POST:
         #Se quiser saber o que vem no metodo use um print dele
@@ -89,29 +91,31 @@ def relatorio(request):
                 # --------------------------DESCONTO APLICADO POR COMPRA, SE FRO POR ITEM MODIFICAR-------------
                 produtos = produtos.annotate(lucro =  (F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade')-F('desconto'))
                 produtos = produtos.annotate(total =  F('fk_compra_id__valor_de_venda')*F('quantidade')-F('desconto'))
+                retorno['quantidade']   = produtos.aggregate(Sum('quantidade'))
+                retorno['total'] = produtos.aggregate(Sum('total'))
+                retorno['lucro'] = produtos.aggregate(Sum('lucro'))
                 #------------------------------
 
                 #Atribuição das colunas de vendas e dos produtos
-                retorno['columns'] = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Desconto' , 'Quantidade', "Total" ,'Lucro']
-
-                #produtos.append({'produto':'Coca Cola Tradicional Garrafa 2L', 'data_ref':'21/12/2022', 'custo_unitario':4.99, "valor_venda":5.99, 'quantidade':20,'lucro':1.00})
-                #produtos.append({'produto': 'Coca Cola Zero Garrafa 2L', 'data_ref': '21/12/2022', 'custo_unitario': 4.99, "valor_venda": 5.99, 'quantidade': 10, 'lucro': 1.00})
+                retorno['columns'] = ['Produto', 'Data Referência', 'Custo Unitario', 'Venda R$', 'Desconto' , 'Quantidade', "Total" ,'Lucro']
 
                 retorno['produtos'] = produtos
 
             elif request.POST['vendas-estoque']=="Estoque":
                 #-----------------------------
-                #Realizar Querry de Estoque no DB
+                produtos = Compra.objects.all().order_by('-restantes')
+                produtos = produtos.annotate(valor_estoque=F('custo_unitario') * F('restantes'))
+                produtos = produtos.annotate(lucro_potencial=(F('valor_de_venda') - F('custo_unitario'))* F('restantes'))
+
+                retorno['quantidade'] = produtos.aggregate(Sum('restantes'))
+                retorno['valor_estoque'] = produtos.aggregate(Sum('valor_estoque'))
+                retorno['lucro_potencial'] = produtos.aggregate(Sum('lucro_potencial'))
+
                 #------------------------------
-
                 # Atribuição das colunas de estoque e dos produtos
-                retorno['columns']   = ['Descricção do Produto','Data de Validade','Custo Unitario','Quantidade em estoque','Valor total Estoque']
+                retorno['columns'] = ['Descricção do Produto','Referencia','Data da Compra', 'Validade',"Custo Unidade R$", 'Venda R$', 'Unidades Estoque', 'Valor Parado', "Lucro Potencial"]
+                retorno['produtos'] = produtos
 
-                produtos.append(
-                    {'produto': 'Coca Cola Tradicional Garrafa 2L', 'data_validade': '21/12/2023', 'custo_unitario': 4.99,
-                      'quantidade': 20, 'valor_estoque': 99.80})
-                produtos.append({'produto': 'Coca Cola Zero Garrafa 2L', 'data_validade': '21/12/2023', 'custo_unitario': 4.99,
-                     'quantidade': 10, 'valor_estoque': 49.90})
 
     #retornar a renderização dos itens:
     # - request como padrão,
@@ -137,13 +141,17 @@ def download(request):
         produtos = Item_Venda.vendas_entre(request.GET['inicio'], request.GET['fim'])
         produtos = produtos\
             .annotate(lucro=(F('fk_compra_id__valor_de_venda') - F('fk_compra_id__custo_unitario')) * F('quantidade'))
-        produtos = list(produtos)
-        campos = ['Produto', 'Data Referência', 'Custo Unitario', 'Valor Venda', 'Desconto' , 'Quantidade', "Total" ,'Lucro']
-        for p in produtos:
-            valores.append([p.fk_item_id , p.data_venda, p.fk_compra_id.custo_unitario, p.fk_compra_id.valor_de_venda, p.desconto  , p.quantidade, p.fk_compra_id.valor_de_venda*p.quantidade-p.desconto, (p.fk_compra_id.valor_de_venda-p.fk_compra_id.custo_unitario)*p.quantidade-p.desconto])
+    else:
+        produtos = Compra.objects.all().order_by('-restantes')
+        produtos = produtos.annotate(valor_estoque=F('custo_unitario') * F('restantes'))
+        produtos = produtos.annotate(lucro_potencial=(F('valor_de_venda')-F('custo_unitario')) * F('restantes'))
+        # ------------------------------
+
+        # Atribuição das colunas de estoque e dos produtos
     # ------------------------------
 
-
+    campos = list(produtos.values()[0].keys())
+    valores = list(produtos.values_list())
 
     #Criação do stream CSV na resposta para retorno dele
     writer = csv.writer(response, csv.excel)
