@@ -46,7 +46,7 @@
 
         <div class="input-group mb-3">
             <span class="input-group-text"><b>Periodicidade :</b></span>
-             <select class="form-select" name="periodo">
+             <select class="form-select" name="periodo" id="periodicidade">
               <option>Diário</option>
               <option>Semanal</option>
               <option>Mensal</option>
@@ -55,10 +55,9 @@
             <span class="input-group-text"><b>Categoria :</b></span>
              <select class="form-select" name="categoria">
               <option>Todas</option>
-              <option>Refrigerante</option>
-              <option>Cervejas</option>
-              <option>Destilados</option>
-              <option>...</option>
+              {% for cat in list_categ %}
+                <option>{{cat}}</option>
+              {% endfor %}
             </select>
         </div>
 
@@ -66,10 +65,10 @@
 
             <div class="col-9 ">
                 <div class="form-check form-switch">
-                  <input class="form-check-input" type="radio" id="vendas" name="vendas-estoque" value="Vendas" checked>
+                  <input class="form-check-input" onchange='disable()' type="radio" id="vendas" name="vendas-estoque" value="Vendas" checked>
                   <label class="form-check-label" for="vendas">Vendas</label>
                 </div>
-                <div class="form-check form-switch">
+                <div class="form-check form-switch" onchange='disable()'>
                       <input class="form-check-input" type="radio" id="estoque" name="vendas-estoque" value="Estoque">
                       <label class="form-check-label" for="estoque">Estoque</label>
                  </div>
@@ -90,7 +89,7 @@
 <div class="container mt-5">
     <div class="row">
       <div class="col-11">
-          <h4>{{tipo}} {{periodo}} de {{inicio}} até {{fim}} da categoria {{categoria}}</h4>
+          <h4>{{tipo}} <b>{{periodo}}</b> de {{inicio}} até {{fim}} da categoria <b>{{categoria}}</b></h4>
       </div>
       <div class="col-1">
               <a href="download?tipo={{tipo}}&inicio={{inicio}}&fim={{fim}}&periodo={{periodo}}&categoria={{categoria}}">
@@ -171,7 +170,21 @@
 </div>
 {% endif %}
 
-
+<script>
+    function disable(){
+        if(document.getElementById('estoque').checked == true){
+            document.getElementById('InicioData').disabled      = true
+            document.getElementById("FimData").disabled         = true
+            document.getElementById("periodicidade").disabled   = true
+        }
+        else{
+            document.getElementById('InicioData').disabled      = false
+            document.getElementById("FimData").disabled         = false
+            document.getElementById("periodicidade").disabled   = false
+        return
+    }
+}
+</script>
 
 </body>
 </html>

@@ -59,7 +59,8 @@ def relatorio(request):
 
     #Adiciona a referência dessa variavel ao dic de retorno assim qualquer coisa mudada nela também será enviada
     retorno = {
-        'produtos':produtos
+        'produtos':produtos,
+        'list_categ' : Itens.get_categorias()
     }
     retorno['date_default'] = datetime.now().strftime("%Y-%m-%d")
     #Só executa se o metodo for POST, ou seja, quando entra na pagina é o metodo GET e não executa
@@ -86,10 +87,17 @@ def relatorio(request):
 
 
             if request.POST['vendas-estoque'] == "Vendas":
+
                 #-----------------------------
                 #Realizar Querry de vendas no DB
+
                 produtos = Item_Venda.vendas_entre(retorno['inicio'], retorno['fim'])
+
+                if retorno['categoria']!="Todas":
+                    produtos = produtos.filter(fk_item_id__categoria=retorno['categoria'])
+
                 # --------------------------DESCONTO APLICADO POR COMPRA, SE FRO POR ITEM MODIFICAR-------------
+
                 produtos = produtos.annotate(lucro =  (F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade')-F('desconto'))
                 produtos = produtos.annotate(total =  F('fk_compra_id__valor_de_venda')*F('quantidade')-F('desconto'))
                 retorno['quantidade']   = produtos.aggregate(Sum('quantidade'))
@@ -121,6 +129,10 @@ def relatorio(request):
             elif request.POST['vendas-estoque']=="Estoque":
                 #-----------------------------
                 produtos = Compra.objects.all().order_by('-restantes')
+
+                if retorno['categoria']!="Todas":
+                    produtos = produtos.filter(fk_item_id__categoria=retorno['categoria'])
+
                 produtos = produtos.annotate(valor_estoque=F('custo_unitario') * F('restantes'))
                 produtos = produtos.annotate(lucro_potencial=(F('valor_de_venda') - F('custo_unitario'))* F('restantes'))
 

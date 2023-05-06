@@ -16,6 +16,10 @@ class Itens(models.Model):
     def __str__(self):
         return f"{self.marca.upper()} - {self.nome} {self.produto_sabor} - {self.tipo} {self.volume}"
 
+    @staticmethod
+    def get_categorias():
+        return set(Itens.objects.values_list('categoria', flat=True))
+
 
 class Item_Venda(models.Model):
     item_venda_id       = models.AutoField(primary_key=True)
