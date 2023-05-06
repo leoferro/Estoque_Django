@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.utils.dateparse import parse_date
 from app_estoque.models import *
 from django.db.models import F, Sum, DateField, TextField
-from django.db.models.functions import Trunc, TruncMonth, Cast
+from django.db.models.functions import Trunc, TruncMonth, Cast, Round
 from datetime import datetime
 
 # Create your views here.
@@ -66,28 +66,26 @@ def relatorio(request):
     #Só executa se o metodo for POST, ou seja, quando entra na pagina é o metodo GET e não executa
     if request.POST:
         #Se quiser saber o que vem no metodo use um print dele
-        #print(request.POST)
-
+        print(request.POST)
         #Retorna erro se  não tiver valor nos campos de inicio e fim (se tiverem campos não validos)
-        if (request.POST['inicio']=='' or request.POST['fim']==''):
-            retorno['erro'] = "Preencha Todos os Campos!"
 
-        #Retorna erro se a data inicial for maior que a final
-        elif parse_date(request.POST['inicio']) > parse_date(request.POST['fim']):
-            retorno['erro'] = "A data inicial deve ser menor ou igual que à final!"
+        #Os campos estão prenchidos corretamentes então á é adicionado ao dicionario de resposta as variáveis escolhidas
+        retorno['categoria'] = request.POST['categoria']
+        retorno['tipo']      = request.POST['vendas-estoque']
 
-        else:
-            #Os campos estão prenchidos corretamentes então á é adicionado ao dicionario de resposta as variáveis escolhidas
+        if request.POST['vendas-estoque'] == "Vendas":
+            retorno['periodo']   = request.POST['periodo']
             retorno['inicio']    = request.POST['inicio']
             retorno['fim']       = request.POST['fim']
-            retorno['categoria'] = request.POST['categoria']
-            retorno['periodo']   = request.POST['periodo']
-            retorno['tipo']      = request.POST['vendas-estoque']
 
+            if (request.POST['inicio'] == '' or request.POST['fim'] == ''):
+                retorno['erro'] = "Preencha Todos os Campos!"
 
+            # Retorna erro se a data inicial for maior que a final
+            elif parse_date(request.POST['inicio']) > parse_date(request.POST['fim']):
+                retorno['erro'] = "A data inicial deve ser menor ou igual que à final!"
 
-            if request.POST['vendas-estoque'] == "Vendas":
-
+            else:
                 #-----------------------------
                 #Realizar Querry de vendas no DB
 
@@ -98,12 +96,13 @@ def relatorio(request):
 
                 # --------------------------DESCONTO APLICADO POR COMPRA, SE FRO POR ITEM MODIFICAR-------------
 
-                produtos = produtos.annotate(lucro =  (F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade')-F('desconto'))
-                produtos = produtos.annotate(total =  F('fk_compra_id__valor_de_venda')*F('quantidade')-F('desconto'))
-                retorno['quantidade']   = produtos.aggregate(Sum('quantidade'))
-                retorno['total'] = produtos.aggregate(Sum('total'))
-                retorno['lucro'] = produtos.aggregate(Sum('lucro'))
+                produtos = produtos.annotate(lucro =  Round((F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade')-F('desconto'),2))
+                produtos = produtos.annotate(total =  Round(F('fk_compra_id__valor_de_venda')*F('quantidade')-F('desconto'),2))
+                retorno['quantidade']   = produtos.aggregate(sum = Round(Sum('quantidade'),2))
+                retorno['total'] = produtos.aggregate(sum = Round(Sum('total'),2))
+                retorno['lucro'] = produtos.aggregate(sum = Round(Sum('lucro'),2))
 
+                print(retorno['lucro'])
 
                 if retorno['periodo']=="Diário":
                     produtos = produtos.annotate(data = F('data_venda'))
@@ -117,7 +116,7 @@ def relatorio(request):
                                            "fk_item_id__volume", 'data', 'fk_compra_id__custo_unitario',
                                             'fk_compra_id__valor_de_venda')\
                                     .annotate(desconto=Sum('desconto'), quantidade=Sum('quantidade'), total=Sum('total'),
-                                            lucro=Sum('lucro')).order_by()
+                                            lucro=Sum('lucro')).order_by('fk_item_id','data')
 
                 #------------------------------
 
@@ -126,24 +125,24 @@ def relatorio(request):
 
                 retorno['produtos'] = produtos
 
-            elif request.POST['vendas-estoque']=="Estoque":
-                #-----------------------------
-                produtos = Compra.objects.all().order_by('-restantes')
+        elif request.POST['vendas-estoque']=="Estoque":
+            #-----------------------------
+            produtos = Compra.objects.all().order_by('-restantes')
 
-                if retorno['categoria']!="Todas":
-                    produtos = produtos.filter(fk_item_id__categoria=retorno['categoria'])
+            if retorno['categoria']!="Todas":
+                produtos = produtos.filter(fk_item_id__categoria=retorno['categoria'])
 
-                produtos = produtos.annotate(valor_estoque=F('custo_unitario') * F('restantes'))
-                produtos = produtos.annotate(lucro_potencial=(F('valor_de_venda') - F('custo_unitario'))* F('restantes'))
+            produtos = produtos.annotate(valor_estoque=Round(F('custo_unitario') * F('restantes'),2))
+            produtos = produtos.annotate(lucro_potencial=Round((F('valor_de_venda') - F('custo_unitario'))* F('restantes'),2))
 
-                retorno['quantidade'] = produtos.aggregate(Sum('restantes'))
-                retorno['valor_estoque'] = produtos.aggregate(Sum('valor_estoque'))
-                retorno['lucro_potencial'] = produtos.aggregate(Sum('lucro_potencial'))
+            retorno['quantidade'] = produtos.aggregate     ( sum  = Round(Sum('restantes'),2))
+            retorno['valor_estoque'] = produtos.aggregate  ( sum  = Round(Sum('valor_estoque'),2))
+            retorno['lucro_potencial'] = produtos.aggregate( sum  = Round(Sum('lucro_potencial'),2))
 
-                #------------------------------
-                # Atribuição das colunas de estoque e dos produtos
-                retorno['columns'] = ['Descricção do Produto','Referencia','Data da Compra', 'Validade',"Custo Unidade R$", 'Venda R$', 'Unidades Estoque', 'Valor Parado', "Lucro Potencial"]
-                retorno['produtos'] = produtos
+            #------------------------------
+            # Atribuição das colunas de estoque e dos produtos
+            retorno['columns'] = ['Descricção do Produto','Referencia','Data da Compra', 'Validade',"Custo Unidade R$", 'Venda R$', 'Unidades Estoque', 'Valor Parado', "Lucro Potencial"]
+            retorno['produtos'] = produtos
 
 
     #retornar a renderização dos itens:
