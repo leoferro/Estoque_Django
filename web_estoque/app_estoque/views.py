@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
 from app_estoque.models import *
-from django.db.models import F, Sum
+from django.db.models import F, Sum, DateField, TextField
+from django.db.models.functions import Trunc, TruncMonth, Cast
 from datetime import datetime
 
 # Create your views here.
@@ -94,6 +95,22 @@ def relatorio(request):
                 retorno['quantidade']   = produtos.aggregate(Sum('quantidade'))
                 retorno['total'] = produtos.aggregate(Sum('total'))
                 retorno['lucro'] = produtos.aggregate(Sum('lucro'))
+
+
+                if retorno['periodo']=="Diário":
+                    produtos = produtos.annotate(data = F('data_venda'))
+                elif retorno['periodo'] == 'Mensal':
+                    produtos = produtos.annotate(data = TruncMonth('data_venda', DateField()))
+                elif retorno['periodo'] == 'Semanal':
+                    produtos = produtos.annotate(data = Trunc('data_venda','week' , DateField()))
+
+
+                produtos = produtos.values('fk_item_id__marca', 'fk_item_id__nome', 'fk_item_id__produto_sabor', "fk_item_id__tipo",
+                                           "fk_item_id__volume", 'data', 'fk_compra_id__custo_unitario',
+                                            'fk_compra_id__valor_de_venda')\
+                                    .annotate(desconto=Sum('desconto'), quantidade=Sum('quantidade'), total=Sum('total'),
+                                            lucro=Sum('lucro')).order_by()
+
                 #------------------------------
 
                 #Atribuição das colunas de vendas e dos produtos
