@@ -21,6 +21,7 @@ class Itens(models.Model):
         return set(Itens.objects.values_list('categoria', flat=True))
 
 
+
 class Item_Venda(models.Model):
     item_venda_id       = models.AutoField(primary_key=True)
     data_venda          = models.DateField(default=datetime.datetime.now)

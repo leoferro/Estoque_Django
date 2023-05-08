@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path("", views.index, name="Estoque App"),
@@ -15,4 +16,6 @@ urlpatterns = [
 
     path("relatorio", views.relatorio, name="Date"),
     path("download", views.download, name="download"),
+    path("cadastro", TemplateView.as_view(template_name="pagina_cadastro.html")),
+
 ]
