@@ -20,6 +20,22 @@ def template(request):
 
 def pagina_compra(request):
     return render(request, 'pagina_compra.html')
+def cadastro(request):
+    retorno={}
+
+
+    if request.POST:
+        categoria=request.POST['Categoria']
+        marca=request.POST['Marca']
+        produto_e_sabor=request.POST['Produto e Sabor']
+        tipo=request.POST['Tipo']
+        volume=request.POST['Volume']
+
+        i = Itens(nome="...", categoria=categoria, marca=marca, produto_sabor=produto_e_sabor, tipo=tipo, volume=volume)
+        i.save()
+    retorno['produtos'] = Itens.objects.all()
+
+    return render(request, 'pagina_cadastro.html', retorno)
 
 
 #Testes

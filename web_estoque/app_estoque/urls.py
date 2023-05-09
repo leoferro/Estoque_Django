@@ -16,6 +16,7 @@ urlpatterns = [
 
     path("relatorio", views.relatorio, name="Date"),
     path("download", views.download, name="download"),
-    path("cadastro", TemplateView.as_view(template_name="pagina_cadastro.html")),
+    path("cadastro", views.cadastro, name="cadastro"),
+
 
 ]
