@@ -25,14 +25,23 @@ def cadastro(request):
 
 
     if request.POST:
-        categoria=request.POST['Categoria']
-        marca=request.POST['Marca']
-        produto_e_sabor=request.POST['Produto e Sabor']
-        tipo=request.POST['Tipo']
-        volume=request.POST['Volume']
+        try:
+            Itens.objects.filter(item_id=request.POST['deletar']).delete()
+        except:
+            print('Passou deletar')
+        try:
 
-        i = Itens(nome="...", categoria=categoria, marca=marca, produto_sabor=produto_e_sabor, tipo=tipo, volume=volume)
-        i.save()
+            categoria=request.POST['Categoria']
+            marca=request.POST['Marca']
+            produto_e_sabor=request.POST['Produto e Sabor']
+            tipo=request.POST['Tipo']
+            volume=request.POST['Volume']
+
+            i = Itens(nome="...", categoria=categoria, marca=marca, produto_sabor=produto_e_sabor, tipo=tipo, volume=volume)
+            i.save()
+        except:
+            print('Passou cadastro')
+
     retorno['produtos'] = Itens.objects.all()
 
     return render(request, 'pagina_cadastro.html', retorno)
