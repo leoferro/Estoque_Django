@@ -37,7 +37,7 @@ def cadastro(request):
             tipo=request.POST['Tipo']
             volume=request.POST['Volume']
 
-            i = Itens(nome="...", categoria=categoria, marca=marca, produto_sabor=produto_e_sabor, tipo=tipo, volume=volume)
+            i = Itens( categoria=categoria, marca=marca, produto_sabor=produto_e_sabor, tipo=tipo, volume=volume)
             i.save()
         except:
             print('Passou cadastro')
@@ -137,7 +137,7 @@ def relatorio(request):
                     produtos = produtos.annotate(data = Trunc('data_venda','week' , DateField()))
 
 
-                produtos = produtos.values('fk_item_id__marca', 'fk_item_id__nome', 'fk_item_id__produto_sabor', "fk_item_id__tipo",
+                produtos = produtos.values('fk_item_id__marca', 'fk_item_id__produto_sabor', "fk_item_id__tipo",
                                            "fk_item_id__volume", 'data', 'fk_compra_id__custo_unitario',
                                             'fk_compra_id__valor_de_venda')\
                                     .annotate(desconto=Sum('desconto'), quantidade=Sum('quantidade'), total=Sum('total'),
@@ -191,11 +191,19 @@ def download(request):
 
     valores = []
     if request.GET['tipo']=="Vendas":
-        produtos = Item_Venda.vendas_entre(request.GET['inicio'], request.GET['fim'])
+        produtos = Item_Venda.vendas_entre(request.GET['inicio'], request.GET['fim'])\
+            .annotate(item = F("fk_item_id__produto_sabor")) \
+            .annotate(marca=F("fk_item_id__marca"))
         produtos = produtos\
+            .annotate(custo_unitario=F('fk_compra_id__custo_unitario'))\
+            .annotate(valor_unitario_item=F('fk_compra_id__valor_de_venda'))\
+            .annotate(valor_total_venda=(F('fk_compra_id__valor_de_venda') * F('quantidade'))-F('desconto'))\
             .annotate(lucro=(F('fk_compra_id__valor_de_venda') - F('fk_compra_id__custo_unitario')) * F('quantidade'))
+
     else:
-        produtos = Compra.objects.all().order_by('-restantes')
+        produtos = Compra.objects.all().order_by('-restantes')\
+            .annotate(item = F("fk_item_id__produto_sabor")) \
+            .annotate(marca=F("fk_item_id__marca"))
         produtos = produtos.annotate(valor_estoque=F('custo_unitario') * F('restantes'))
         produtos = produtos.annotate(lucro_potencial=(F('valor_de_venda')-F('custo_unitario')) * F('restantes'))
         # ------------------------------

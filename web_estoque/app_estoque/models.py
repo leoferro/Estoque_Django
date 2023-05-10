@@ -6,7 +6,6 @@ from django.db import models
 
 class Itens(models.Model):
     item_id             = models.AutoField(primary_key=True)
-    nome                = models.CharField(max_length=30)
     categoria           = models.CharField(max_length=30)
     marca               = models.CharField(max_length=30, default="NA")
     produto_sabor       = models.CharField(max_length=30, default="NA")
@@ -14,7 +13,7 @@ class Itens(models.Model):
     volume              = models.CharField(max_length=30)
 
     def __str__(self):
-        return f"{self.marca.upper()} - {self.nome} {self.produto_sabor} - {self.tipo} {self.volume}"
+        return f"{self.marca.upper()} - {self.produto_sabor} - {self.tipo} {self.volume}"
 
     @staticmethod
     def get_categorias():
@@ -32,7 +31,7 @@ class Item_Venda(models.Model):
     #precisa pegar ligar em qual compra foi para pegar o valor
 
     def __str__(self):
-        return f"{self.data_venda} - {self.quantidade} {self.fk_item_id.nome}"
+        return f"{self.data_venda} - {self.quantidade} {self.fk_item_id.produto_sabor}"
 
     @staticmethod
     def vendas_entre(data_menor, data_maior):
@@ -89,7 +88,7 @@ class Compra(models.Model):
     restantes           = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return f"{self.data_compra} - {self.numero_referencia} - {self.quantidade} {self.fk_item_id.nome} resta - {self.restantes}"
+        return f"{self.data_compra} - {self.numero_referencia} - {self.quantidade} {self.fk_item_id.produto_sabor} resta - {self.restantes}"
 
     @staticmethod
     def encontrar_em_estoque(id):

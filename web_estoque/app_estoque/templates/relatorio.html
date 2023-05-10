@@ -115,7 +115,7 @@
     {% if tipo == "Vendas" %}
         {% for p in produtos %}
             <tr>
-                <td>{{p.fk_item_id__marca}} - {{p.fk_item_id__nome}} {{p.fk_item_id__produto_sabor}} - {{p.fk_item_id__tipo}} {{p.fk_item_id__volume}}</td>
+                <td>{{p.fk_item_id__marca}} - {{p.fk_item_id__produto_sabor}} - {{p.fk_item_id__tipo}} {{p.fk_item_id__volume}}</td>
                 <td>{{p.data}}</td>
                 <td>{{p.fk_compra_id__custo_unitario}}</td>
                 <td>{{p.fk_compra_id__valor_de_venda}}</td>
