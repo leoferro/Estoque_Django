@@ -15,21 +15,50 @@
     <body>
 
         {% include "navbar.html" %}
+        <div class="container mt-3">
+                <h1>Venda do produto</h1>
+                <form action="venda_do_produto" method="post">
+                {% csrf_token %}
 
-        <h1>cola cola </h1>
-        <form>
+                    {% for i in lista_ids %}
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><b>Item {{i}}</b></span>
+                        <input class="form-control w-50" list="itens" name="item_{{i}}" id="item_{{i}}" autocomplete="off">
+                            <datalist id="itens">
+                            {% for item in itens %}
+                              <option value="[{{item.item_id}}] {{item}}">
+                            {% endfor %}
+                            </datalist>
+                        <span class="input-group-text">Quantidade</span>
+                      <input id="quantidade" class="form-control quantidade" type="number" name = "quantidade_{{i}}" value = 0 onchange="soma_total()" />
+                        <span class="input-group-text">Desconto</span>
+                      <input id="desconto" class="form-control desconto" type="number" name = "desconto_{{i}}" value = 0 />
+                    </div>
+                    {% endfor %}
 
+                    <div class="col-3 mt-3">
+                        <button type="reset" class="btn btn-secondary">Limpar</button>
+                        <button type="submit" class="btn btn-primary">Cadastrar Venda</button>
+                    </div>
+                    <p><B>TOTAL: </B></p>
+                    <P id="total">0.00</P>
+                </form>
+        </div>
 
-            <label for="browser" class="form-label">Choose your browser from the list:</label>
-            <input class="form-control" list="browsers" name="browser" id="browser">
-            <datalist id="browsers">
-              <option value="Coca">
-              <option value="Guarana">
-              <option value="Fanta">
-              <option value="Outro">
-              <option value="Carvao">
-            </datalist>
-        </form>
+        <script>
 
+            function soma_total(){
+                var total = 0
+
+                for (var i = 0; i < 8; i++) {
+                    total += parseFloat(document.getElementsByClassName("quantidade")[i].value);
+                }
+
+            document.getElementById('total').innerText = total
+
+            }
+        </script>
     </body>
+
+
 </hmtl>

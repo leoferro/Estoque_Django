@@ -58,7 +58,25 @@ def delete_item(request):
     return tabela_ex(request)
 
 def pagina_venda(request):
-    return render(request, 'venda_do_produto.html')
+    retorno = {}
+    retorno['lista_ids'] = range(8)
+
+    retorno['itens'] = Itens.objects.all()
+
+    print(retorno['itens'])
+
+    if request.POST:
+
+        for i in retorno['lista_ids']:
+            if request.POST[f'item_{i}']!='' and request.POST[f'quantidade_{i}']!='0':
+                id_find = request.POST[f'item_{i}']
+                id_find = int(id_find[1:id_find.index(']')])
+
+                print(Itens.objects.get(item_id=id_find))
+
+                Item_Venda.add_venda(id_find, int(request.POST[f'quantidade_{i}']), int(request.POST[f'desconto_{i}']))
+
+    return render(request, 'venda_do_produto.html', retorno)
 
 
 
@@ -122,7 +140,7 @@ def relatorio(request):
                 # --------------------------DESCONTO APLICADO POR COMPRA, SE FRO POR ITEM MODIFICAR-------------
 
                 produtos = produtos.annotate(lucro =  Round((F('fk_compra_id__valor_de_venda')-F('fk_compra_id__custo_unitario'))*F('quantidade')-F('desconto'),2))
-                produtos = produtos.annotate(total =  Round(F('fk_compra_id__valor_de_venda')*F('quantidade')-F('desconto'),2))
+                produtos = produtos.annotate(total =  Round( F('fk_compra_id__valor_de_venda') * F('quantidade') ,2)-F('desconto'))
                 retorno['quantidade']   = produtos.aggregate(sum = Round(Sum('quantidade'),2))
                 retorno['total'] = produtos.aggregate(sum = Round(Sum('total'),2))
                 retorno['lucro'] = produtos.aggregate(sum = Round(Sum('lucro'),2))
@@ -140,7 +158,7 @@ def relatorio(request):
                 produtos = produtos.values('fk_item_id__marca', 'fk_item_id__produto_sabor', "fk_item_id__tipo",
                                            "fk_item_id__volume", 'data', 'fk_compra_id__custo_unitario',
                                             'fk_compra_id__valor_de_venda')\
-                                    .annotate(desconto=Sum('desconto'), quantidade=Sum('quantidade'), total=Sum('total'),
+                                    .annotate(desconto=Sum('desconto'), quantidade=Sum('quantidade'), total=Round(Sum('total'),2),
                                             lucro=Sum('lucro')).order_by('fk_item_id','data')
 
                 #------------------------------
