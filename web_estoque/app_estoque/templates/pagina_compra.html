@@ -12,55 +12,62 @@
 
 {% include "navbar.html" %}
 
+
+{% if erro %}
+<div class="alert alert-info">
+  <strong>Erro:</strong> {{erro}}
+</div>
+{% endif %}
+
 <div class="container mt-3">
   <h2>Página de cadastro</h2>
   <p>Cadastre a compra abaixo:</p>
 
-  <form action="/action_page.php">
+  <form action="pagina_de_compra" method="post">
+        {% csrf_token %}
     <div class="input-group mb-3">
       <span class="input-group-text">Data:</span>
-      <input type="date" class="form-control" name="usrname">
+      <input type="date" class="form-control" name="data_compra" required>
     </div>
 
     <div class="input-group mb-3">
       <span class="input-group-text">Número de identificação:</span>
-      <input type="number" class="form-control" name="usrname">
+      <input type="number" class="form-control" name="n_identificacao" required>
     </div>
 
     <div class="input-group mb-3">
       <span class="input-group-text">Fornecedor:</span>
-      <input type="text" class="form-control" name="usrname">
+      <input type="text" class="form-control" name="fornecedor" required>
     </div>
 
-    <div class="dropdown mb-3">
-  		<button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-    		Dropdown
-  		</button>
-  		<ul class="dropdown-menu">
-    	<li><a class="dropdown-item" href="#">info prod1</a></li>
-   	 	<li><a class="dropdown-item" href="#">info prod2</a></li>
-   	 	<li><a class="dropdown-item" href="#">info prod3</a></li>
-  		</ul>
-	</div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Item </span>
+      <input class="form-control w-50" list="itens" name="item" id="item" autocomplete="off" required>
+      <datalist id="itens">
+        {% for item in itens %}
+          <option value="[{{item.item_id}}] {{item}}">
+        {% endfor %}
+      </datalist>
+    </div>
 
     <div class="input-group mb-3">
       <span class="input-group-text">Quantidade:</span>
-      <input type="number" class="form-control" name="usrname">
+      <input type="number" class="form-control" name="quantidade" required>
     </div>
 
      <div class="input-group mb-3">
       <span class="input-group-text">Preço: R$</span>
-      <input type="number" class="form-control" name="usrname">
+      <input type="number" class="form-control" name="custo" step="0.01" required>
     </div>
 
     <div class="input-group mb-3">
       <span class="input-group-text">Venda: R$</span>
-      <input type="number" class="form-control" name="usrname">
+      <input type="number" class="form-control" name="venda" step="0.01">
     </div>
 
     <div class="input-group mb-3">
       <span class="input-group-text">Validade:</span>
-      <input type="date" class="form-control" name="usrname">
+      <input type="date" class="form-control" name="validade" required>
     </div>
 
 
@@ -70,7 +77,52 @@
 
 
 <!-- CRIAR A TABELA AQUI DENTRO -->
+     <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Número de referencia</th>
+        <th>Fornecedor</th>
+        <th>Item</th>
+        <th>Quantidade</th>
+        <th>Preço</th>
+        <th>Venda</th>
+        <th>Validade</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for c in compras %}
+      <tr>
+        <td>{{c.data_compra}}</td>
+        <td>{{c.numero_referencia}}</td>
+        <td>{{c.fornecedor}}</td>
+        <td>{{c.fk_item_id}}</td>
+        <td>{{c.quantidade}}</td>
+        <td>{{c.custo_unitario}}</td>
+        <td>{{c.valor_de_venda}}</td>
+        <td>{{c.validade}}</td>
 
+
+        <td>
+    <form action="pagina_de_compra" method="post">
+         {% csrf_token %}
+
+            <button type="submit" name="deletar" value="{{c.compra_id}}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                </svg>
+            </button>
+
+    </form>
+
+
+        </td>
+      </tr>
+    {% endfor %}
+
+    </tbody>
 
 
 <!-- ATÉ AQUI------------------ -->

@@ -7,6 +7,8 @@ from django.db.models import F, Sum, DateField, TextField
 from django.db.models.functions import Trunc, TruncMonth, Cast, Round
 from datetime import datetime
 
+from django.db.models.deletion import ProtectedError
+
 # Create your views here.
 
 def index(request):
@@ -19,7 +21,48 @@ def template(request):
     return render(request, 'template.html')
 
 def pagina_compra(request):
-    return render(request, 'pagina_compra.html')
+    retorno = {}
+
+    retorno['itens']   = Itens.objects.all()
+
+    if request.POST:
+        try:
+            Compra.objects.filter(compra_id=request.POST['deletar']).delete()
+        except ProtectedError as e:
+            retorno['erro'] = 'Existe Dados dependentes dessa Compra. É necessário apaga-los antes de apagar a compra'
+            print(e)
+        except:
+            print('Outro Erro')
+
+        try:
+            id_item = int(request.POST['item'][1:request.POST['item'].index(']')])
+
+            valor = request.POST['venda']
+            if valor == '':
+                valor = Compra.encontrar_ultimo_valor(id_item)
+
+            c = Compra(
+                data_compra         = request.POST['data_compra'],
+                numero_referencia   = request.POST['n_identificacao'],
+                fornecedor          = request.POST['fornecedor'],
+                fk_item_id          = Itens.objects.get(item_id = id_item),
+                quantidade          = request.POST['quantidade'],
+                custo_unitario      = request.POST['custo'],
+                valor_de_venda      = valor,
+                validade            = request.POST['validade'],
+                restantes           = request.POST['quantidade'],
+            )
+            print(c)
+            c.save()
+        except:
+            print('Post sem inserir')
+
+
+
+    retorno['compras'] = Compra.objects.all()
+    return render(request, 'pagina_compra.html', retorno)
+
+
 def cadastro(request):
     retorno={}
 
@@ -77,22 +120,6 @@ def pagina_venda(request):
                 Item_Venda.add_venda(id_find, int(request.POST[f'quantidade_{i}']), int(request.POST[f'desconto_{i}']))
 
     return render(request, 'venda_do_produto.html', retorno)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Função da view do Relatório
