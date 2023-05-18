@@ -116,5 +116,8 @@ class Compra(models.Model):
                     recente do produto
         '''
         compras = Compra.objects.filter(fk_item_id_id=id)
-        compras = compras.order_by("data_compra").last()
-        return compras.valor_de_venda
+        if len(compras)>0:
+            compras = compras.order_by("data_compra").last()
+            return compras.valor_de_venda
+        else:
+            return False

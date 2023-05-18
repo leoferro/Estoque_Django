@@ -26,40 +26,63 @@ def pagina_compra(request):
     retorno['itens']   = Itens.objects.all()
 
     if request.POST:
+
         try:
-            Compra.objects.filter(compra_id=request.POST['deletar']).delete()
-        except ProtectedError as e:
-            retorno['erro'] = 'Existe Dados dependentes dessa Compra. É necessário apaga-los antes de apagar a compra'
-            print(e)
+            deletar = request.POST['deletar']
         except:
-            print('Outro Erro')
+            deletar = ''
+            print('não foi post de delete')
+
+        if deletar != '':
+            try:
+                Compra.objects.filter(compra_id=request.POST['deletar']).delete()
+            except ProtectedError as e:
+                retorno['erro'] = 'Existe Dados dependentes dessa Compra. É necessário apaga-los antes de apagar a compra'
+                print(e)
+            except:
+                print('Outro Erro')
+
 
         try:
             id_item = int(request.POST['item'][1:request.POST['item'].index(']')])
+            data_compra = request.POST['data_compra']
+            numero_referencia = request.POST['n_identificacao']
+            fornecedor = request.POST['fornecedor']
+            fk_item_id = Itens.objects.get(item_id = id_item)
+            quantidade = request.POST['quantidade']
+            custo_unitario = request.POST['custo']
+            validade = request.POST['validade']
+            restantes = request.POST['quantidade']
 
             valor = request.POST['venda']
+        except:
+            id_item=False
+            print('Não foi Post de inserção')
+
+        if id_item:
             if valor == '':
                 valor = Compra.encontrar_ultimo_valor(id_item)
+                print(valor)
+            if valor:
+                c = Compra(
+                    data_compra         = data_compra,
+                    numero_referencia   = numero_referencia,
+                    fornecedor          = fornecedor,
+                    fk_item_id          = fk_item_id,
+                    quantidade          = quantidade,
+                    custo_unitario      = custo_unitario,
+                    valor_de_venda      = valor,
+                    validade            = validade,
+                    restantes           = restantes,
+                )
+                print(c)
+                c.save()
+            else:
+                retorno['erro'] = 'Não Há registros anteriores desse produto, é necessário atribuir valor'
 
-            c = Compra(
-                data_compra         = request.POST['data_compra'],
-                numero_referencia   = request.POST['n_identificacao'],
-                fornecedor          = request.POST['fornecedor'],
-                fk_item_id          = Itens.objects.get(item_id = id_item),
-                quantidade          = request.POST['quantidade'],
-                custo_unitario      = request.POST['custo'],
-                valor_de_venda      = valor,
-                validade            = request.POST['validade'],
-                restantes           = request.POST['quantidade'],
-            )
-            print(c)
-            c.save()
-        except:
-            print('Post sem inserir')
 
 
-
-    retorno['compras'] = Compra.objects.all()
+    retorno['compras'] = Compra.objects.all().order_by('-data_compra')
     return render(request, 'pagina_compra.html', retorno)
 
 
