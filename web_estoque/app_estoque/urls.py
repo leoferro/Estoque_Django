@@ -8,6 +8,9 @@ urlpatterns = [
 
     path("template", views.template, name="template"),
 
+    path("auth", views.autenticacao, name="autenticacao"),
+    path("logout", views.faz_logout, name="logout"),
+
     path("pagina_de_compra", views.pagina_compra, name="pagina_compra"),
     path("venda_do_produto", views.pagina_venda, name="venda_do_produto"),
     #testes:

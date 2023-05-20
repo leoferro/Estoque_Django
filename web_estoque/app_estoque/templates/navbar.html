@@ -19,4 +19,9 @@
         </li>
       </ul>
     </div>
+
+      <form class="d-flex" action="logout" method="POST">
+          {% csrf_token %}
+        <button class="btn btn-primary rounded-5 me-3" type="submit">Logout</button>
+      </form>
   </nav>

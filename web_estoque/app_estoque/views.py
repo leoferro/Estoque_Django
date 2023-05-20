@@ -1,11 +1,12 @@
 import csv
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
 from app_estoque.models import *
 from django.db.models import F, Sum, DateField, TextField
 from django.db.models.functions import Trunc, TruncMonth, Cast, Round
 from datetime import datetime
+from django.contrib.auth import authenticate, login, logout
 
 from django.db.models.deletion import ProtectedError
 
@@ -20,7 +21,35 @@ def teste(request):
 def template(request):
     return render(request, 'template.html')
 
+def faz_logout(request):
+    logout(request)
+    return redirect(autenticacao)
+
+def autenticacao(request):
+    resposta = {}
+    print(request.user)
+
+    if request.POST:
+        username = request.POST['user']
+        password = request.POST['pswd']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            print(user)
+            login(request, user)
+        else:
+            resposta['erro'] = "Usuário ou senha inválidos."
+
+    if request.user.is_authenticated:
+        return redirect(pagina_compra)
+
+
+    return render(request, 'autenticacao.html', resposta)
+
 def pagina_compra(request):
+
+    if not request.user.is_authenticated:
+        return redirect(autenticacao)
+
     retorno = {}
 
     retorno['itens']   = Itens.objects.all()
@@ -87,6 +116,11 @@ def pagina_compra(request):
 
 
 def cadastro(request):
+
+    if not request.user.is_authenticated:
+        return redirect(autenticacao)
+
+
     retorno={}
 
 
@@ -120,10 +154,16 @@ def tabela_ex(request):
     return render(request, 'tabela_ex.html')
 
 def delete_item(request):
+    if not request.user.is_authenticated:
+        return redirect(autenticacao)
+
     print(request.POST)
     return tabela_ex(request)
 
 def pagina_venda(request):
+    if not request.user.is_authenticated:
+        return redirect(autenticacao)
+
     retorno = {}
     retorno['lista_ids'] = range(8)
 
@@ -147,6 +187,9 @@ def pagina_venda(request):
 
 # Função da view do Relatório
 def relatorio(request):
+
+    if not request.user.is_authenticated:
+        return redirect(autenticacao)
     #Inicializa variável que irá conter todos os produtos a serem renderizados na pagina
     produtos = []
 
@@ -247,6 +290,8 @@ def relatorio(request):
 
 # Função da view de download dentro do relatorio
 def download(request):
+    if not request.user.is_authenticated:
+        return redirect(autenticacao)
     #print(request.GET)
 
     # Criando a resposta e adicionando informações ao protocolo HTTP para ele baixar o arquivo e não mudar de página

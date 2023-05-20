@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<hmtl>
+    <head>
+          <title>Autenticação</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+
+            <!-- Importação do bootstrap -->
+          {% load static %}
+          <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+          <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+          <!-- Fim da importação do Bootstrap -->
+    </head>
+
+    <body>
+
+
+
+    {% include "navbar.html" %}
+
+        <!-- Se retornado a chave erro no dicionario ele vai criar um alerta de erro -->
+        {% if erro %}
+        <div class="alert alert-info">
+          <strong>Erro:</strong> {{erro}}
+        </div>
+        {% endif %}
+    <!-- Fim do condicional do erro -->
+
+        <div class="container mt-5 w-50">
+            <h1>Autenticação</h1>
+             <form action="auth" method="POST">
+                 {% csrf_token %}
+              <div class="mb-3 mt-3">
+                <label for="user" class="form-label">User:</label>
+                <input type="text" class="form-control" id="user" placeholder="Digitar usuario" name="user">
+              </div>
+              <div class="mb-3">
+                <label for="pwd" class="form-label">Password:</label>
+                <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pswd">
+              </div>
+              <button type="submit" class="btn btn-primary">Entrar</button>
+            </form>
+        </div>
+
+    </body>
+</hmtl>
