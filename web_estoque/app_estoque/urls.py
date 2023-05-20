@@ -3,7 +3,7 @@ from . import views
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    path("", views.index, name="Estoque App"),
+    path("", views.pagina_venda, name="venda_do_produto_inicial"),
     path("teste", views.teste, name="Teste"),
 
     path("template", views.template, name="template"),
